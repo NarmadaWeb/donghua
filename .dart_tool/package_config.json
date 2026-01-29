@@ -440,6 +440,12 @@
       "languageVersion": "3.5"
     },
     {
+      "name": "timeago",
+      "rootUri": "file:///home/jules/.pub-cache/hosted/pub.dev/timeago-3.7.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "typed_data",
       "rootUri": "file:///home/jules/.pub-cache/hosted/pub.dev/typed_data-1.4.0",
       "packageUri": "lib/",
