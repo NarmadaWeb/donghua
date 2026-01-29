@@ -3,6 +3,8 @@ import '../../constants/colors.dart';
 import '../../widgets/glass_container.dart';
 import 'home_screen.dart';
 import 'profile_screen.dart';
+import 'library_screen.dart';
+import 'downloads_screen.dart';
 
 class MainWrapper extends StatefulWidget {
   const MainWrapper({super.key});
@@ -16,8 +18,8 @@ class _MainWrapperState extends State<MainWrapper> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const HomeScreen(), // Library (Reuse Home for prototype)
-    const ProfileScreen(), // Downloads (Reuse Profile for prototype)
+    const LibraryScreen(),
+    const DownloadsScreen(),
     const ProfileScreen(),
   ];
 
