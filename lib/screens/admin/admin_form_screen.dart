@@ -21,6 +21,7 @@ class _AdminFormScreenState extends State<AdminFormScreen> {
   late TextEditingController _titleController;
   late TextEditingController _descController;
   late TextEditingController _coverController;
+  late TextEditingController _videoUrlController;
   late TextEditingController _episodesController;
   late TextEditingController _ratingController;
 
@@ -33,6 +34,7 @@ class _AdminFormScreenState extends State<AdminFormScreen> {
     _titleController = TextEditingController(text: widget.donghua?.title ?? '');
     _descController = TextEditingController(text: widget.donghua?.description ?? '');
     _coverController = TextEditingController(text: widget.donghua?.coverUrl ?? '');
+    _videoUrlController = TextEditingController(text: widget.donghua?.videoUrl ?? '');
     _episodesController = TextEditingController(text: widget.donghua?.episodes.toString() ?? '');
     _ratingController = TextEditingController(text: widget.donghua?.rating.toString() ?? '');
     if (widget.donghua != null) {
@@ -45,6 +47,7 @@ class _AdminFormScreenState extends State<AdminFormScreen> {
     _titleController.dispose();
     _descController.dispose();
     _coverController.dispose();
+    _videoUrlController.dispose();
     _episodesController.dispose();
     _ratingController.dispose();
     super.dispose();
@@ -61,6 +64,7 @@ class _AdminFormScreenState extends State<AdminFormScreen> {
       title: _titleController.text,
       description: _descController.text,
       coverUrl: _coverController.text,
+      videoUrl: _videoUrlController.text,
       status: _status,
       genres: ['Action', 'Fantasy'], // Hardcoded for prototype simplicity
       rating: double.tryParse(_ratingController.text) ?? 0.0,
@@ -96,6 +100,7 @@ class _AdminFormScreenState extends State<AdminFormScreen> {
               _titleController.clear();
               _descController.clear();
               _coverController.clear();
+              _videoUrlController.clear();
             },
             child: const Text('Reset', style: TextStyle(color: AppColors.primary)),
           )
@@ -120,6 +125,21 @@ class _AdminFormScreenState extends State<AdminFormScreen> {
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(border: InputBorder.none, hintText: 'https://...', hintStyle: TextStyle(color: Colors.white30)),
                     validator: (v) => v!.isEmpty ? 'Required' : null,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 16),
+              const Row(children: [Icon(Icons.video_library, color: AppColors.primary), SizedBox(width: 8), Text('Video URL', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold))]),
+              const SizedBox(height: 8),
+              GlassContainer(
+                color: AppColors.cardDark,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: TextFormField(
+                    controller: _videoUrlController,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(border: InputBorder.none, hintText: 'https://...', hintStyle: TextStyle(color: Colors.white30)),
                   ),
                 ),
               ),

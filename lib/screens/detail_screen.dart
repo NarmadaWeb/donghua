@@ -85,18 +85,26 @@ class _DetailScreenState extends State<DetailScreen> {
                       ),
                       Center(
                         child: GestureDetector(
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PlayerScreen())),
+                          onTap: widget.donghua.videoUrl.isNotEmpty
+                              ? () => Navigator.push(context, MaterialPageRoute(builder: (_) => PlayerScreen(videoUrl: widget.donghua.videoUrl)))
+                              : null,
                           child: Container(
                             width: 80,
                             height: 80,
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.9),
+                              color: widget.donghua.videoUrl.isNotEmpty
+                                  ? AppColors.primary.withOpacity(0.9)
+                                  : Colors.grey.withOpacity(0.5),
                               shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(color: AppColors.primary.withOpacity(0.4), blurRadius: 20, spreadRadius: 5),
-                              ],
+                              boxShadow: widget.donghua.videoUrl.isNotEmpty
+                                  ? [BoxShadow(color: AppColors.primary.withOpacity(0.4), blurRadius: 20, spreadRadius: 5)]
+                                  : [],
                             ),
-                            child: const Icon(Icons.play_arrow, color: Colors.white, size: 40),
+                            child: Icon(
+                                Icons.play_arrow,
+                                color: widget.donghua.videoUrl.isNotEmpty ? Colors.white : Colors.white54,
+                                size: 40
+                            ),
                           ),
                         ),
                       ),
@@ -140,7 +148,17 @@ class _DetailScreenState extends State<DetailScreen> {
                           child: Text(g, style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
                         )).toList(),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 16),
+                      if (widget.donghua.videoUrl.isNotEmpty) ...[
+                        const Text('Video Link:', style: TextStyle(color: AppColors.textLight, fontSize: 12, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 4),
+                        SelectableText(
+                          widget.donghua.videoUrl,
+                          style: const TextStyle(color: AppColors.accentPurple, fontSize: 12, decoration: TextDecoration.underline),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                      const SizedBox(height: 16),
                       const Text('Synopsis', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 8),
                       Text(

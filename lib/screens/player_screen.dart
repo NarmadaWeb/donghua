@@ -4,7 +4,8 @@ import 'package:chewie/chewie.dart';
 import '../../constants/colors.dart';
 
 class PlayerScreen extends StatefulWidget {
-  const PlayerScreen({super.key});
+  final String videoUrl;
+  const PlayerScreen({super.key, required this.videoUrl});
 
   @override
   State<PlayerScreen> createState() => _PlayerScreenState();
@@ -17,9 +18,13 @@ class _PlayerScreenState extends State<PlayerScreen> {
   @override
   void initState() {
     super.initState();
-    // Using a sample video URL
+
+    if (widget.videoUrl.isEmpty) {
+      return;
+    }
+
     _videoPlayerController = VideoPlayerController.networkUrl(
-        Uri.parse('https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4'));
+        Uri.parse(widget.videoUrl));
 
     _videoPlayerController.initialize().then((_) {
       setState(() {
@@ -60,9 +65,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
       body: Stack(
         children: [
           Center(
-            child: _chewieController != null && _chewieController!.videoPlayerController.value.isInitialized
-                ? Chewie(controller: _chewieController!)
-                : const CircularProgressIndicator(color: AppColors.primary),
+            child: widget.videoUrl.isEmpty
+              ? const Text('No Video URL', style: TextStyle(color: Colors.white))
+              : (_chewieController != null && _chewieController!.videoPlayerController.value.isInitialized
+                  ? Chewie(controller: _chewieController!)
+                  : const CircularProgressIndicator(color: AppColors.primary)),
           ),
 
           // Custom Header (Overlay) - Only visible if we implemented custom controls,

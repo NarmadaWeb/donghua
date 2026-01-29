@@ -3,6 +3,7 @@ class Donghua {
   final String title;
   final String description;
   final String coverUrl;
+  final String videoUrl;
   final String status;
   final List<String> genres;
   final double rating;
@@ -14,6 +15,7 @@ class Donghua {
     required this.title,
     required this.description,
     required this.coverUrl,
+    this.videoUrl = '',
     required this.status,
     required this.genres,
     required this.rating,
@@ -27,6 +29,7 @@ class Donghua {
       'title': title,
       'description': description,
       'coverUrl': coverUrl,
+      'videoUrl': videoUrl,
       'status': status,
       'genres': genres,
       'rating': rating,
@@ -41,6 +44,7 @@ class Donghua {
       title: json['title'],
       description: json['description'],
       coverUrl: json['coverUrl'],
+      videoUrl: json['videoUrl'] ?? '',
       status: json['status'],
       genres: List<String>.from(json['genres'] ?? []),
       rating: (json['rating'] as num).toDouble(),
@@ -53,6 +57,7 @@ class Donghua {
     String? title,
     String? description,
     String? coverUrl,
+    String? videoUrl,
     String? status,
     List<String>? genres,
     double? rating,
@@ -64,6 +69,7 @@ class Donghua {
       title: title ?? this.title,
       description: description ?? this.description,
       coverUrl: coverUrl ?? this.coverUrl,
+      videoUrl: videoUrl ?? this.videoUrl,
       status: status ?? this.status,
       genres: genres ?? this.genres,
       rating: rating ?? this.rating,
