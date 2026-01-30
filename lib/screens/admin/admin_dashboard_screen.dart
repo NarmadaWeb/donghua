@@ -5,6 +5,7 @@ import '../../constants/colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/content_provider.dart';
 import '../auth/login_screen.dart';
+import '../main_wrapper.dart';
 import 'admin_form_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
@@ -33,6 +34,11 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         backgroundColor: AppColors.backgroundDark,
         title: const Text('Admin Dashboard', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         actions: [
+          IconButton(
+            tooltip: 'View as User',
+            icon: const Icon(Icons.visibility, color: Colors.white),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MainWrapper())),
+          ),
           IconButton(
             icon: const Icon(Icons.logout, color: Colors.red),
             onPressed: () {

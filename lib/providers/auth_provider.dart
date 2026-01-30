@@ -12,6 +12,19 @@ class AuthProvider with ChangeNotifier {
   bool get isAdmin => _currentUser?.role == 'admin';
 
   Future<bool> login(String email, String password) async {
+    // Hardcoded admin check
+    if (email == 'admin@donghua.com' && password == 'admin123') {
+      _currentUser = User(
+        id: 'admin_static',
+        username: 'Administrator',
+        email: email,
+        password: password,
+        role: 'admin',
+      );
+      notifyListeners();
+      return true;
+    }
+
     final List<dynamic> usersJson = await _storageService.readData('users.json');
     final users = usersJson.map((json) => User.fromJson(json)).toList();
 
