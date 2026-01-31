@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../constants/colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/content_provider.dart';
+import '../../widgets/empty_state.dart';
 import '../auth/login_screen.dart';
 import '../main_wrapper.dart';
 import 'admin_form_screen.dart';
@@ -56,77 +57,89 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
       ),
       body: contentProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: donghuas.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                final item = donghuas[index];
-                return Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.cardDark,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.white10),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 60,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(8),
-                          image: DecorationImage(
-                            image: CachedNetworkImageProvider(item.coverUrl),
-                            fit: BoxFit.cover,
+          : RefreshIndicator(
+              onRefresh: () => contentProvider.refreshData(),
+              color: AppColors.primary,
+              backgroundColor: AppColors.cardDark,
+              child: donghuas.isEmpty
+                  ? ListView(
+                      children: const [
+                        SizedBox(height: 200),
+                        EmptyStateWidget(message: 'No Donghuas found. Add one!'),
+                      ],
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: donghuas.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 16),
+                      itemBuilder: (context, index) {
+                        final item = donghuas[index];
+                        return Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.cardDark,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: Colors.white10),
                           ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(item.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                            const SizedBox(height: 4),
-                            Text('${item.status} • ${item.episodes} Eps', style: const TextStyle(color: AppColors.textLight, fontSize: 12)),
-                            const SizedBox(height: 4),
-                            Text('Rating: ${item.rating}', style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.edit, color: AppColors.accentPurple),
-                            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AdminFormScreen(donghua: item))),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete, color: Colors.redAccent),
-                            onPressed: () async {
-                              final confirm = await showDialog<bool>(
-                                context: context,
-                                builder: (_) => AlertDialog(
-                                  backgroundColor: AppColors.cardDark,
-                                  title: const Text('Delete?', style: TextStyle(color: Colors.white)),
-                                  content: Text('Are you sure you want to delete "${item.title}"?', style: const TextStyle(color: Colors.white70)),
-                                  actions: [
-                                    TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-                                    TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 60,
+                                height: 80,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  image: DecorationImage(
+                                    image: CachedNetworkImageProvider(item.coverUrl),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(item.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                                    const SizedBox(height: 4),
+                                    Text('${item.status} • ${item.episodes} Eps', style: const TextStyle(color: AppColors.textLight, fontSize: 12)),
+                                    const SizedBox(height: 4),
+                                    Text('Rating: ${item.rating}', style: const TextStyle(color: AppColors.primary, fontSize: 12, fontWeight: FontWeight.bold)),
                                   ],
                                 ),
-                              );
-                              if (confirm == true) {
-                                await contentProvider.deleteDonghua(item.id);
-                              }
-                            },
+                              ),
+                              Column(
+                                children: [
+                                  IconButton(
+                                    icon: const Icon(Icons.edit, color: AppColors.accentPurple),
+                                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AdminFormScreen(donghua: item))),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, color: Colors.redAccent),
+                                    onPressed: () async {
+                                      final confirm = await showDialog<bool>(
+                                        context: context,
+                                        builder: (_) => AlertDialog(
+                                          backgroundColor: AppColors.cardDark,
+                                          title: const Text('Delete?', style: TextStyle(color: Colors.white)),
+                                          content: Text('Are you sure you want to delete "${item.title}"?', style: const TextStyle(color: Colors.white70)),
+                                          actions: [
+                                            TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+                                            TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete', style: TextStyle(color: Colors.red))),
+                                          ],
+                                        ),
+                                      );
+                                      if (confirm == true) {
+                                        await contentProvider.deleteDonghua(item.id);
+                                      }
+                                    },
+                                  ),
+                                ],
+                              )
+                            ],
                           ),
-                        ],
-                      )
-                    ],
-                  ),
-                );
-              },
+                        );
+                      },
+                    ),
             ),
     );
   }

@@ -19,7 +19,17 @@ class StorageService {
   Future<void> initializeData() async {
     // Initialize Users
     final usersFile = await _getFile('users.json');
+    bool shouldInitUsers = false;
     if (!await usersFile.exists()) {
+      shouldInitUsers = true;
+    } else {
+      final content = await usersFile.readAsString();
+      if (content.trim().isEmpty || content == '[]') {
+        shouldInitUsers = true;
+      }
+    }
+
+    if (shouldInitUsers) {
       final adminUser = User(
         id: 'admin_001',
         username: 'Admin',
@@ -32,7 +42,17 @@ class StorageService {
 
     // Initialize Donghuas
     final donghuasFile = await _getFile('donghuas.json');
+    bool shouldInitDonghuas = false;
     if (!await donghuasFile.exists()) {
+      shouldInitDonghuas = true;
+    } else {
+      final content = await donghuasFile.readAsString();
+      if (content.trim().isEmpty || content == '[]') {
+        shouldInitDonghuas = true;
+      }
+    }
+
+    if (shouldInitDonghuas) {
       final sampleDonghuas = [
         Donghua(
           id: 'dh_001',
@@ -98,8 +118,13 @@ class StorageService {
       final file = await _getFile(filename);
       if (!await file.exists()) return [];
       final contents = await file.readAsString();
-      if (contents.isEmpty) return [];
-      return jsonDecode(contents);
+      if (contents.trim().isEmpty) return [];
+
+      final data = jsonDecode(contents);
+      if (data is List) {
+        return data;
+      }
+      return [];
     } catch (e) {
       print('Error reading $filename: $e');
       return [];

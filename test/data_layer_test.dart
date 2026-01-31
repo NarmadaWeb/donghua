@@ -77,4 +77,16 @@ void main() {
     final usersJson = await storage.readData('users.json');
     expect(usersJson.length, 2); // Admin + TestUser
   });
+
+  test('StorageService re-seeds empty files', () async {
+    final storage = StorageService();
+    // Manually create empty file
+    final file = File('${tempDir.path}/donghuas.json');
+    await file.writeAsString('');
+
+    await storage.initializeData();
+
+    final content = await storage.readData('donghuas.json');
+    expect(content.isNotEmpty, true);
+  });
 }

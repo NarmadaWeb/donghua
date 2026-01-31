@@ -18,16 +18,25 @@ class ContentProvider with ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    await _storageService.initializeData();
+    try {
+      await _storageService.initializeData();
 
-    final donghuasJson = await _storageService.readData('donghuas.json');
-    _donghuas = donghuasJson.map((json) => Donghua.fromJson(json)).toList();
+      final donghuasJson = await _storageService.readData('donghuas.json');
+      _donghuas = donghuasJson.map((json) => Donghua.fromJson(json)).toList();
 
-    final commentsJson = await _storageService.readData('comments.json');
-    _comments = commentsJson.map((json) => Comment.fromJson(json)).toList();
+      final commentsJson = await _storageService.readData('comments.json');
+      _comments = commentsJson.map((json) => Comment.fromJson(json)).toList();
+    } catch (e) {
+      print('Error loading data: $e');
+      // In case of error, we keep the lists as they are or empty
+    }
 
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<void> refreshData() async {
+    await loadData();
   }
 
   // CRUD for Donghua
