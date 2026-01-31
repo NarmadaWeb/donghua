@@ -5,6 +5,7 @@ import '../../constants/colors.dart';
 import '../../models/donghua.dart';
 import '../../providers/content_provider.dart';
 import '../../widgets/glass_container.dart';
+import '../../widgets/empty_state.dart';
 import 'detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -90,230 +91,241 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: contentProvider.isLoading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.only(top: 100, bottom: 100),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Search Bar
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: GlassContainer(
-                      color: AppColors.cardDark.withOpacity(0.5),
-                      child: const TextField(
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          hintText: 'Search your favorite Donghua...',
-                          hintStyle: TextStyle(color: AppColors.textLight),
-                          prefixIcon: Icon(Icons.search, color: AppColors.textLight),
-                          border: InputBorder.none,
-                          contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Trending
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Trending Now', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                        TextButton(onPressed: () {}, child: const Text('See All', style: TextStyle(color: AppColors.primary, fontSize: 12))),
+          : RefreshIndicator(
+              onRefresh: () => contentProvider.refreshData(),
+              color: AppColors.primary,
+              backgroundColor: AppColors.cardDark,
+              child: donghuas.isEmpty
+                  ? ListView(
+                      children: const [
+                        SizedBox(height: 200),
+                        EmptyStateWidget(message: 'No Donghuas available yet.'),
                       ],
-                    ),
-                  ),
-
-                  SizedBox(
-                    height: 220,
-                    child: ListView.separated(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      scrollDirection: Axis.horizontal,
-                      itemCount: donghuas.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 16),
-                      itemBuilder: (context, index) {
-                        final item = donghuas[index];
-                        return GestureDetector(
-                          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetailScreen(donghua: item))),
-                          child: Container(
-                            width: 300,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: AppColors.cardDark,
-                              image: DecorationImage(
-                                image: CachedNetworkImageProvider(item.coverUrl),
-                                fit: BoxFit.cover,
+                    )
+                  : SingleChildScrollView(
+                      padding: const EdgeInsets.only(top: 100, bottom: 100),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Search Bar
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: GlassContainer(
+                              color: AppColors.cardDark.withOpacity(0.5),
+                              child: const TextField(
+                                style: TextStyle(color: Colors.white),
+                                decoration: InputDecoration(
+                                  hintText: 'Search your favorite Donghua...',
+                                  hintStyle: TextStyle(color: AppColors.textLight),
+                                  prefixIcon: Icon(Icons.search, color: AppColors.textLight),
+                                  border: InputBorder.none,
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                                ),
                               ),
                             ),
-                            child: Stack(
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          // Trending
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Container(
-                                  decoration: const BoxDecoration(
-                                    borderRadius: BorderRadius.all(Radius.circular(12)),
-                                    gradient: LinearGradient(
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                      colors: [Colors.transparent, Colors.black87],
-                                    ),
-                                  ),
-                                ),
-                                Positioned(
-                                  bottom: 16,
-                                  left: 16,
-                                  right: 16,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text('NEW EPISODE AVAILABLE', style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
-                                      Text(item.title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text('${item.genres.firstOrNull ?? "Action"} • Ep ${item.episodes}', style: const TextStyle(color: AppColors.textLight, fontSize: 12)),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                            decoration: BoxDecoration(
-                                              color: AppColors.primary,
-                                              borderRadius: BorderRadius.circular(8),
-                                            ),
-                                            child: const Row(
-                                              children: [
-                                                Icon(Icons.play_arrow, size: 16, color: Colors.white),
-                                                SizedBox(width: 4),
-                                                Text('Watch Now', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                                              ],
-                                            ),
-                                          )
-                                        ],
-                                      )
-                                    ],
-                                  ),
-                                ),
+                                const Text('Trending Now', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                                TextButton(onPressed: () {}, child: const Text('See All', style: TextStyle(color: AppColors.primary, fontSize: 12))),
                               ],
                             ),
                           ),
-                        );
-                      },
-                    ),
-                  ),
 
-                  const SizedBox(height: 24),
-
-                  // Genres
-                  SizedBox(
-                    height: 36,
-                    child: ListView(
-                      scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      children: ['All', 'Action', '3D Cultivation', 'Romance', 'Sci-Fi'].map((genre) {
-                        final isSelected = genre == 'All';
-                        return Container(
-                          margin: const EdgeInsets.only(right: 10),
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: isSelected ? AppColors.primary : AppColors.cardDark,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.white.withOpacity(0.05)),
-                          ),
-                          child: Text(genre, style: TextStyle(color: isSelected ? Colors.white : AppColors.textLight, fontSize: 12, fontWeight: FontWeight.w600)),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  // Latest Updates
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Latest Updates', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                        // Only show Add New if logic allows, but for User Home, just headers.
-                      ],
-                    ),
-                  ),
-
-                  GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      childAspectRatio: 0.7,
-                      crossAxisSpacing: 16,
-                      mainAxisSpacing: 16,
-                    ),
-                    itemCount: donghuas.length,
-                    itemBuilder: (context, index) {
-                      final item = donghuas[index];
-                      return GestureDetector(
-                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetailScreen(donghua: item))),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(
-                              child: Stack(
-                                children: [
-                                  Container(
+                          SizedBox(
+                            height: 220,
+                            child: ListView.separated(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              scrollDirection: Axis.horizontal,
+                              itemCount: donghuas.length,
+                              separatorBuilder: (_, __) => const SizedBox(width: 16),
+                              itemBuilder: (context, index) {
+                                final item = donghuas[index];
+                                return GestureDetector(
+                                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetailScreen(donghua: item))),
+                                  child: Container(
+                                    width: 300,
                                     decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(12),
+                                      color: AppColors.cardDark,
                                       image: DecorationImage(
                                         image: CachedNetworkImageProvider(item.coverUrl),
                                         fit: BoxFit.cover,
                                       ),
                                     ),
-                                  ),
-                                  Positioned(
-                                    top: 8,
-                                    left: 8,
-                                    child: GlassContainer(
-                                      color: Colors.black,
-                                      opacity: 0.6,
-                                      borderRadius: BorderRadius.circular(8),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                                        child: Row(
-                                          children: [
-                                            const Icon(Icons.star, color: Colors.amber, size: 12),
-                                            const SizedBox(width: 4),
-                                            Text(item.rating.toString(), style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                                          ],
+                                    child: Stack(
+                                      children: [
+                                        Container(
+                                          decoration: const BoxDecoration(
+                                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topCenter,
+                                              end: Alignment.bottomCenter,
+                                              colors: [Colors.transparent, Colors.black87],
+                                            ),
+                                          ),
                                         ),
-                                      ),
+                                        Positioned(
+                                          bottom: 16,
+                                          left: 16,
+                                          right: 16,
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              const Text('NEW EPISODE AVAILABLE', style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                                              Text(item.title, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                                              const SizedBox(height: 8),
+                                              Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text('${item.genres.firstOrNull ?? "Action"} • Ep ${item.episodes}', style: const TextStyle(color: AppColors.textLight, fontSize: 12)),
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                                    decoration: BoxDecoration(
+                                                      color: AppColors.primary,
+                                                      borderRadius: BorderRadius.circular(8),
+                                                    ),
+                                                    child: const Row(
+                                                      children: [
+                                                        Icon(Icons.play_arrow, size: 16, color: Colors.white),
+                                                        SizedBox(width: 4),
+                                                        Text('Watch Now', style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                                      ],
+                                                    ),
+                                                  )
+                                                ],
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  Positioned(
-                                    bottom: 8,
-                                    right: 8,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary,
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: Text('Ep ${item.episodes}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
-                                    ),
-                                  )
-                                ],
-                              ),
+                                );
+                              },
                             ),
-                            const SizedBox(height: 8),
-                            Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
-                            Text('Updated ${item.releaseTime}', style: const TextStyle(color: AppColors.textLight, fontSize: 11)),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          // Genres
+                          SizedBox(
+                            height: 36,
+                            child: ListView(
+                              scrollDirection: Axis.horizontal,
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              children: ['All', 'Action', '3D Cultivation', 'Romance', 'Sci-Fi'].map((genre) {
+                                final isSelected = genre == 'All';
+                                return Container(
+                                  margin: const EdgeInsets.only(right: 10),
+                                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                                  alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                    color: isSelected ? AppColors.primary : AppColors.cardDark,
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.white.withOpacity(0.05)),
+                                  ),
+                                  child: Text(genre, style: TextStyle(color: isSelected ? Colors.white : AppColors.textLight, fontSize: 12, fontWeight: FontWeight.w600)),
+                                );
+                              }).toList(),
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          // Latest Updates
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Latest Updates', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                          ),
+
+                          GridView.builder(
+                            padding: const EdgeInsets.all(16),
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              childAspectRatio: 0.7,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                            ),
+                            itemCount: donghuas.length,
+                            itemBuilder: (context, index) {
+                              final item = donghuas[index];
+                              return GestureDetector(
+                                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => DetailScreen(donghua: item))),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Expanded(
+                                      child: Stack(
+                                        children: [
+                                          Container(
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(12),
+                                              image: DecorationImage(
+                                                image: CachedNetworkImageProvider(item.coverUrl),
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                          Positioned(
+                                            top: 8,
+                                            left: 8,
+                                            child: GlassContainer(
+                                              color: Colors.black,
+                                              opacity: 0.6,
+                                              borderRadius: BorderRadius.circular(8),
+                                              child: Padding(
+                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                                                child: Row(
+                                                  children: [
+                                                    const Icon(Icons.star, color: Colors.amber, size: 12),
+                                                    const SizedBox(width: 4),
+                                                    Text(item.rating.toString(), style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          Positioned(
+                                            bottom: 8,
+                                            right: 8,
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                color: AppColors.primary,
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text('Ep ${item.episodes}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+                                    Text('Updated ${item.releaseTime}', style: const TextStyle(color: AppColors.textLight, fontSize: 11)),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
             ),
     );
   }
