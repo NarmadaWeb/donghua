@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
-import 'package:chewie/chewie.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import '../../constants/colors.dart';
 
 class PlayerScreen extends StatefulWidget {
@@ -12,49 +11,44 @@ class PlayerScreen extends StatefulWidget {
 }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  late VideoPlayerController _videoPlayerController;
-  ChewieController? _chewieController;
+  late YoutubePlayerController _controller;
+  bool _isPlayerReady = false;
 
   @override
   void initState() {
     super.initState();
 
-    if (widget.videoUrl.isEmpty) {
-      return;
-    }
+    final videoId = YoutubePlayer.convertUrlToId(widget.videoUrl) ?? '';
 
-    _videoPlayerController = VideoPlayerController.networkUrl(
-        Uri.parse(widget.videoUrl));
+    _controller = YoutubePlayerController(
+      initialVideoId: videoId,
+      flags: const YoutubePlayerFlags(
+        autoPlay: true,
+        mute: false,
+        loop: true,
+        enableCaption: false,
+      ),
+    )..addListener(_listener);
+  }
 
-    _videoPlayerController.initialize().then((_) {
+  void _listener() {
+    if (_isPlayerReady && mounted && !_controller.value.isFullScreen) {
       setState(() {
-        _chewieController = ChewieController(
-          videoPlayerController: _videoPlayerController,
-          autoPlay: true,
-          looping: true,
-          aspectRatio: 16/9,
-          fullScreenByDefault: false,
-
-          // Customizing UI to match prototype partially (Chewie does a lot, but we can theme it)
-          materialProgressColors: ChewieProgressColors(
-            playedColor: AppColors.primary,
-            handleColor: Colors.white,
-            backgroundColor: Colors.white24,
-            bufferedColor: Colors.white10,
-          ),
-          placeholder: Container(
-            color: Colors.black,
-          ),
-          autoInitialize: true,
-        );
+        // Update state if needed
       });
-    });
+    }
+  }
+
+  @override
+  void deactivate() {
+    // Pauses video while navigating to next page.
+    _controller.pause();
+    super.deactivate();
   }
 
   @override
   void dispose() {
-    _videoPlayerController.dispose();
-    _chewieController?.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -66,14 +60,21 @@ class _PlayerScreenState extends State<PlayerScreen> {
         children: [
           Center(
             child: widget.videoUrl.isEmpty
-              ? const Text('No Video URL', style: TextStyle(color: Colors.white))
-              : (_chewieController != null && _chewieController!.videoPlayerController.value.isInitialized
-                  ? Chewie(controller: _chewieController!)
-                  : const CircularProgressIndicator(color: AppColors.primary)),
+                ? const Text('No Video URL', style: TextStyle(color: Colors.white))
+                : YoutubePlayer(
+                    controller: _controller,
+                    showVideoProgressIndicator: true,
+                    progressIndicatorColor: AppColors.primary,
+                    progressColors: const ProgressBarColors(
+                      playedColor: AppColors.primary,
+                      handleColor: Colors.white,
+                    ),
+                    onReady: () {
+                      _isPlayerReady = true;
+                    },
+                  ),
           ),
-
-          // Custom Header (Overlay) - Only visible if we implemented custom controls,
-          // but with Chewie it handles it. We can add a back button on top if we want.
+          // Custom Back Button
           Positioned(
             top: 40,
             left: 20,
@@ -85,7 +86,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
                   color: Colors.black45,
                   borderRadius: BorderRadius.circular(50),
                 ),
-                child: const Icon(Icons.arrow_back_ios_new, color: Colors.white, size: 24),
+                child: const Icon(Icons.arrow_back_ios_new,
+                    color: Colors.white, size: 24),
               ),
             ),
           ),
